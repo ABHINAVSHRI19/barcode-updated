@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetroVerify - SIH Pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-color: #FFFFFF;
+    --text-color: #111111;
+    --accent-color: #0F5C5C;
+    --gray-color: #888888;
+  }
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow: hidden;
+  }
+
+  .deck {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide scrollbar */
+  .deck::-webkit-scrollbar {
+    display: none;
+  }
+  .deck {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .slide {
+    flex: 0 0 100vw;
+    height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 2rem;
+  }
+
+  .content-wrapper {
+    width: 65%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .slide-number {
+    position: absolute;
+    bottom: 2.5rem;
+    right: 3.5rem;
+    font-size: 0.85rem;
+    color: var(--gray-color);
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 5.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    font-size: 4rem;
+    font-weight: 600;
+    line-height: 1.1;
+    margin-bottom: 3.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    font-size: 1.35rem;
+    line-height: 1.5;
+  }
+
+  .subtitle {
+    font-size: 1.6rem;
+    color: var(--gray-color);
+    font-weight: 400;
+  }
+
+  .eyebrow {
+    font-size: 0.9rem;
+    color: var(--gray-color);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .accent {
+    color: var(--accent-color);
+  }
+
+  /* Slide 1 specifics */
+  #slide1 .content-wrapper {
+    align-items: flex-start;
+  }
+  #slide1 .team-name {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 3.5rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+  }
+
+  /* Slide 2 specifics */
+  .features-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 4rem;
+    margin-bottom: 4rem;
+    margin-top: 1rem;
+  }
+  
+  .feature-item {
+    flex: 1;
+  }
+  
+  .feature-label {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: block;
+    font-size: 1.6rem;
+  }
+  
+  .feature-desc {
+    font-size: 1.35rem;
+    color: var(--text-color);
+    line-height: 1.4;
+  }
+
+  .hr-rule {
+    height: 1px;
+    background-color: #E0E0E0;
+    border: none;
+    margin-bottom: 2.5rem;
+    width: 100%;
+  }
+
+  .italic-line {
+    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    font-weight: 400;
+  }
+
+  /* Slide 3 specifics */
+  .two-column {
+    display: flex;
+    gap: 12rem;
+    margin-top: 2rem;
+  }
+  
+  .col-left, .col-right {
+    flex: 1;
+  }
+  
+  .col-header {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 2.5rem;
+  }
+  
+  .stack-list p {
+    margin-bottom: 1.25rem;
+    font-size: 1.4rem;
+  }
+  
+  .flow-sequence {
+    position: relative;
+    padding-left: 2rem;
+  }
+  
+  .flow-sequence::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75rem;
+    bottom: 1rem;
+    width: 1px;
+    background-color: var(--text-color);
+  }
+  
+  .flow-item {
+    position: relative;
+    margin-bottom: 2rem;
+    font-size: 1.4rem;
+  }
+  
+  .flow-item::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 1px;
+    background-color: var(--text-color);
+  }
+  
+  .flow-item:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Slide 4 specifics */
+  .three-column {
+    display: flex;
+    gap: 4rem;
+  }
+  
+  .col {
+    flex: 1;
+  }
+  
+  .col-header-accent {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 2rem;
+  }
+  
+  .col p {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  /* Slide 5 specifics */
+  .four-item-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    width: 100%;
+  }
+  
+  .impact-item {
+    flex: 1;
+  }
+  
+  .impact-label {
+    font-weight: 700;
+    font-size: 1.6rem;
+    display: block;
+    margin-bottom: 1rem;
+  }
+  
+  .impact-desc {
+    font-size: 1.25rem;
+    color: var(--text-color);
+    line-height: 1.4;
+  }
+  
+  /* Slide 6 (Placeholder) specifics */
+  #slide6 .content-wrapper {
+    align-items: center;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1 -->
+  <section class="slide" id="slide1">
+    <div class="content-wrapper">
+      <div class="eyebrow">SIH26036 — SOFTWARE</div>
+      <h1>MetroVerify</h1>
+      <div class="subtitle">Verification you can trust — Fast. Accurate. Tamper-Proof.</div>
+    </div>
+    <div class="team-name">Team Name</div>
+    <div class="slide-number">1 / 6</div>
+  </section>
+
+  <!-- SLIDE 2 -->
+  <section class="slide" id="slide2">
+    <div class="content-wrapper">
+      <h2>Scan. Verify. Lock.</h2>
+      
+      <div class="features-row">
+        <div class="feature-item">
+          <span class="feature-label">Scan</span>
+          <div class="feature-desc">Camera reads the instrument display instantly</div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-label">Verify</span>
+          <div class="feature-desc">Checks against legal OIML tolerance limits automatically</div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-label">Lock</span>
+          <div class="feature-desc">Every result is cryptographically signed, permanently tamper-proof</div>
+        </div>
+      </div>
+      
+      <hr class="hr-rule">
+      <div class="italic-line">Most solutions digitize verification. We make every verification permanently provable.</div>
+    </div>
+    <div class="slide-number">2 / 6</div>
+  </section>
+
+  <!-- SLIDE 3 -->
+  <section class="slide" id="slide3">
+    <div class="content-wrapper">
+      <div class="two-column">
+        <div class="col-left">
+          <div class="col-header">Stack</div>
+          <div class="stack-list">
+            <p>Computer Vision (OCR)</p>
+            <p>Rule Engine (OIML tolerance lookup)</p>
+            <p>Cryptographic Signing</p>
+            <p>Cloud Sync</p>
+            <p>NFC Tag Read/Write</p>
+          </div>
+        </div>
+        
+        <div class="col-right">
+          <div class="col-header">Flow</div>
+          <div class="flow-sequence">
+            <div class="flow-item">Scan</div>
+            <div class="flow-item">Compare</div>
+            <div class="flow-item">Result</div>
+            <div class="flow-item">Sign</div>
+            <div class="flow-item">Sync</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-number">3 / 6</div>
+  </section>
+
+  <!-- SLIDE 4 -->
+  <section class="slide" id="slide4">
+    <div class="content-wrapper">
+      <div class="three-column">
+        <div class="col">
+          <div class="col-header-accent">Why it works</div>
+          <p>Leverages ubiquitous smartphone cameras</p>
+          <p>Local rule engine enables offline verification</p>
+        </div>
+        <div class="col">
+          <div class="col-header-accent">Risks</div>
+          <p>Poor lighting affecting OCR accuracy</p>
+          <p>Intermittent internet connectivity in field</p>
+        </div>
+        <div class="col">
+          <div class="col-header-accent">Mitigation</div>
+          <p>Built-in flash control & fallback manual entry</p>
+          <p>Store-and-forward sync mechanism</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-number">4 / 6</div>
+  </section>
+
+  <!-- SLIDE 5 -->
+  <section class="slide" id="slide5">
+    <div class="content-wrapper">
+      <div class="four-item-row">
+        <div class="impact-item">
+          <span class="impact-label">Faster</span>
+          <div class="impact-desc">Digital replaces paper process</div>
+        </div>
+        <div class="impact-item">
+          <span class="impact-label">Reliable</span>
+          <div class="impact-desc">Tamper-proof by design</div>
+        </div>
+        <div class="impact-item">
+          <span class="impact-label">Transparent</span>
+          <div class="impact-desc">Instantly checkable by anyone</div>
+        </div>
+        <div class="impact-item">
+          <span class="impact-label">Manageable</span>
+          <div class="impact-desc">Real-time compliance dashboard</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-number">5 / 6</div>
+  </section>
+  
+  <!-- SLIDE 6 (Placeholder) -->
+  <section class="slide" id="slide6">
+    <div class="content-wrapper">
+      <h2 class="accent" style="margin-bottom: 1rem;">Slide 6 Missing</h2>
+      <p>The instructions for Slide 6 were cut off from the prompt.</p>
+      <p style="font-size: 1rem; color: var(--gray-color); margin-top: 1rem;">Please provide the content for Slide 6 to complete the presentation.</p>
+    </div>
+    <div class="slide-number">6 / 6</div>
+  </section>
+
+</div>
+
+<script>
+  // Keyboard navigation for presentation
+  document.addEventListener('keydown', (e) => {
+    const deck = document.getElementById('deck');
+    const slideWidth = window.innerWidth;
+    
+    // Right/Down/Space -> Next Slide
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      deck.scrollBy({ left: slideWidth, behavior: 'smooth' });
+    } 
+    // Left/Up -> Previous Slide
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      deck.scrollBy({ left: -slideWidth, behavior: 'smooth' });
+    }
+  });
+</script>
+
+</body>
+</html>

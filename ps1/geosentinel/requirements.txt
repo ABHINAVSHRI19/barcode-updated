@@ -1,0 +1,9 @@
+# Project requirements for GeoSentinel prototype
+streamlit
+scikit-learn
+pandas
+numpy
+plotly
+folium
+streamlit-folium
+joblib

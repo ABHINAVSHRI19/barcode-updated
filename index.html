@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NutriScan – Analyze packaged food health using barcode or ingredient list. Get health scores, ingredient analysis, and long-term impact predictions.">
+  <title>NutriScan – Food Health Analyzer</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Three.js for 3D background -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- ===== 3D WEBGL BACKGROUND ===== -->
+  <canvas id="bg3d" aria-hidden="true"></canvas>
+
+  <!-- ===== CSS FLOATING ORBS (colour bleed) ===== -->
+  <div class="floating-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+    <div class="orb orb-5"></div>
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="18" stroke="url(#logoGrad)" stroke-width="3" fill="none"/>
+            <path d="M20 8c-3 5-8 10-6 18 2-5 8-10 12-16-2 0-4-1-6-2z" fill="url(#logoGrad)"/>
+            <defs><linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#8B5CF6"/><stop offset="1" stop-color="#EC4899"/></linearGradient></defs>
+          </svg>
+        </div>
+        <h1 class="logo-text">Nutri<span>Scan</span></h1>
+      </div>
+      <button class="history-btn" id="historyBtn" title="Scan History">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span class="history-badge" id="historyBadge">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== HERO / INPUT SECTION ===== -->
+  <main>
+    <section class="hero-section" id="heroSection">
+      <div class="hero-particles" id="heroParticles"></div>
+      <div class="hero-content">
+        <h2 class="hero-title">Know What You <span class="gradient-text">Eat</span></h2>
+        <p class="hero-subtitle">Scan a barcode to get an instant AI-powered health analysis</p>
+
+        <!-- Barcode Input -->
+        <div class="input-panel active" id="panelBarcode">
+          <div class="barcode-input-row">
+            <input type="text" id="barcodeInput" placeholder="Enter barcode number (e.g. 3017620422003)" autocomplete="off">
+            <button class="scan-btn" id="scanBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Scan
+            </button>
+          </div>
+          <button class="camera-btn" id="cameraBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Use Camera to Scan Barcode
+          </button>
+          <div id="cameraContainer" class="camera-container hidden">
+            <div id="qr-reader" style="width:100%"></div>
+            <button class="close-camera-btn" id="closeCameraBtn">✕ Close Camera</button>
+          </div>
+
+          <!-- Label Camera Divider -->
+          <div class="or-divider"><span>or</span></div>
+
+          <!-- Scan Nutrition Label Button -->
+          <button class="label-scan-btn" id="labelScanBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="18" rx="2"/>
+              <line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/>
+              <line x1="8" y1="16" x2="12" y2="16"/>
+              <circle cx="19" cy="19" r="4" fill="currentColor" stroke="none" class="label-cam-dot"/>
+              <path d="M17.5 19l1 1 2-2" stroke="white" stroke-width="1.5" fill="none"/>
+            </svg>
+            📷 Capture Nutrition Label / Ingredients
+            <span class="label-badge">Gemini AI</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== LABEL CAMERA MODAL ===== -->
+    <div class="label-modal hidden" id="labelModal" role="dialog" aria-modal="true" aria-label="Capture Nutrition Label">
+      <div class="label-modal-inner">
+
+        <!-- Header -->
+        <div class="label-modal-header">
+          <div class="label-modal-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+            Capture Nutrition Label
+          </div>
+          <button class="label-modal-close" id="labelModalClose" aria-label="Close">✕</button>
+        </div>
+
+        <!-- Instruction strip -->
+        <p class="label-modal-hint" id="labelModalHint">Point camera at the <strong>Nutrition Facts</strong> or <strong>Ingredients</strong> printed on the packaging</p>
+
+        <!-- Video viewport -->
+        <div class="label-viewport" id="labelViewport">
+          <video id="labelVideo" autoplay playsinline muted></video>
+          <canvas id="labelCanvas" class="hidden"></canvas>
+
+          <!-- Targeting overlay -->
+          <div class="label-overlay">
+            <div class="label-corner tl"></div>
+            <div class="label-corner tr"></div>
+            <div class="label-corner bl"></div>
+            <div class="label-corner br"></div>
+            <div class="label-scan-line" id="labelScanLine"></div>
+          </div>
+
+          <!-- Preview after capture -->
+          <img id="labelPreview" class="label-preview hidden" alt="Captured label">
+        </div>
+
+        <!-- Action buttons -->
+        <div class="label-modal-actions" id="labelModalActions">
+          <button class="label-capture-btn" id="labelCaptureBtn">
+            <span class="capture-ring"></span>
+          </button>
+          <p class="label-capture-hint">Tap to capture</p>
+        </div>
+
+        <!-- Post-capture controls -->
+        <div class="label-post-actions hidden" id="labelPostActions">
+          <button class="label-retake-btn" id="labelRetakeBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.07-11.49L1 10"/></svg>
+            Retake
+          </button>
+          <button class="label-analyze-btn" id="labelAnalyzeBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Analyze with Gemini
+          </button>
+        </div>
+
+        <!-- Extracting overlay -->
+        <div class="label-extracting hidden" id="labelExtracting">
+          <div class="extracting-spinner"></div>
+          <p id="labelExtractingText">Reading label with Gemini Vision...</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== LOADING STATE ===== -->
+    <section class="loading-section hidden" id="loadingSection">
+      <div class="loader-ring">
+        <div class="ring-segment"></div>
+        <div class="ring-segment"></div>
+        <div class="ring-segment"></div>
+      </div>
+      <p class="loading-text" id="loadingText">Fetching product data...</p>
+      <div class="loading-steps">
+        <div class="step" id="step1"><span class="step-dot"></span> Retrieving product info</div>
+        <div class="step" id="step2"><span class="step-dot"></span> Analyzing nutrients</div>
+        <div class="step" id="step3"><span class="step-dot"></span> AI ingredient analysis</div>
+        <div class="step" id="step4"><span class="step-dot"></span> Generating report</div>
+      </div>
+    </section>
+
+    <!-- ===== NOT FOUND STATE ===== -->
+    <section class="notfound-section hidden" id="notFoundSection">
+      <div class="notfound-card glass-card">
+        <div class="notfound-icon">🔍</div>
+        <h2 class="notfound-title">Oops! Product Not Found</h2>
+        <p class="notfound-desc">
+          We searched across <strong>Open Food Facts</strong>, <strong>FatSecret</strong>, and <strong>USDA</strong> databases
+          but couldn't find any data for barcode:
+        </p>
+        <div class="notfound-barcode" id="notFoundBarcode"></div>
+        <p class="notfound-hint">
+          This product may not be in our database yet. Please double-check the barcode or try a different product.
+        </p>
+        <div class="notfound-actions">
+          <button class="notfound-retry-btn" id="notFoundRetryBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.07-11.49L1 10"/></svg>
+            Try Again
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== RESULTS DASHBOARD ===== -->
+    <section class="results-section hidden" id="resultsSection">
+
+      <!-- Product Info Bar -->
+      <div class="product-bar glass-card animate-in" id="productBar">
+        <img id="productImage" src="" alt="Product" class="product-thumb">
+        <div class="product-info">
+          <h3 id="productName">Product Name</h3>
+          <p id="productBrand" class="product-brand">Brand</p>
+        </div>
+        <button class="share-btn" id="shareBtn" title="Share Report">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+      </div>
+
+      <!-- Health Score -->
+      <div class="score-card glass-card animate-in" id="scoreCard">
+        <h2 class="section-title">Health Score</h2>
+        <div class="score-gauge-wrapper">
+          <div class="score-gauge" id="scoreGauge">
+            <svg viewBox="0 0 200 200" class="gauge-svg">
+              <circle cx="100" cy="100" r="88" class="gauge-track"/>
+              <circle cx="100" cy="100" r="88" class="gauge-fill" id="gaugeFill"/>
+            </svg>
+            <div class="gauge-center">
+              <span class="gauge-score" id="gaugeScore">0</span>
+              <span class="gauge-label" id="gaugeLabel">Analyzing</span>
+            </div>
+          </div>
+          <div class="score-verdict" id="scoreVerdict">
+            <span class="verdict-emoji" id="verdictEmoji">🔍</span>
+            <span class="verdict-text" id="verdictText">Waiting for analysis...</span>
+          </div>
+        </div>
+
+        <!-- Confetti canvas -->
+        <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+
+        <!-- Score Breakdown -->
+        <div class="score-breakdown" id="scoreBreakdown">
+          <div class="breakdown-header">
+            <span class="breakdown-icon">📊</span>
+            <span class="breakdown-title">Score Breakdown</span>
+          </div>
+          <div class="breakdown-list" id="breakdownList">
+            <!-- dynamic -->
+          </div>
+        </div>
+
+        <!-- Dropdowns -->
+        <div class="dropdown" id="harmfulDropdown">
+          <button class="dropdown-toggle" id="harmfulToggle">
+            <span class="dropdown-icon harmful-icon">⚠️</span>
+            <span>Harmful Ingredients</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-content" id="harmfulContent">
+            <!-- dynamic -->
+          </div>
+        </div>
+
+        <div class="dropdown" id="nutritionDropdown">
+          <button class="dropdown-toggle" id="nutritionToggle">
+            <span class="dropdown-icon good-icon">✅</span>
+            <span>Good Nutrition Values</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-content" id="nutritionContent">
+            <!-- dynamic -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Conditions Personalizer -->
+      <div class="conditions-card glass-card animate-in" id="conditionsCard">
+        <h2 class="section-title">🏥 Health Conditions</h2>
+        <p class="conditions-subtitle">Select conditions to see personalized scoring for this product</p>
+        <div class="conditions-chips" id="conditionsChips">
+          <!-- dynamic chips -->
+        </div>
+        <div class="conditions-result hidden" id="conditionsResult">
+          <div class="conditions-adjusted" id="conditionsAdjusted"></div>
+          <div class="conditions-penalties" id="conditionsPenalties"></div>
+          <div class="conditions-explanations" id="conditionsExplanations"></div>
+        </div>
+      </div>
+
+      <!-- Processing Level -->
+      <div class="processing-card glass-card animate-in" id="processingCard">
+        <h2 class="section-title">Processing Level</h2>
+        <div class="processing-scale">
+          <div class="proc-step" id="procNatural">
+            <div class="proc-dot"></div>
+            <span>Natural</span>
+          </div>
+          <div class="proc-line" id="procLine1"></div>
+          <div class="proc-step" id="procProcessed">
+            <div class="proc-dot"></div>
+            <span>Processed</span>
+          </div>
+          <div class="proc-line" id="procLine2"></div>
+          <div class="proc-step" id="procUltra">
+            <div class="proc-dot"></div>
+            <span>Ultra-Processed</span>
+          </div>
+        </div>
+        <p class="processing-reason" id="processingReason">—</p>
+      </div>
+
+      <!-- Ingredient Breakdown Chart -->
+      <div class="chart-card glass-card animate-in" id="chartCard">
+        <h2 class="section-title">Nutrient Breakdown</h2>
+        <div class="chart-wrapper">
+          <canvas id="donutChart" width="220" height="220"></canvas>
+          <div class="chart-legend" id="chartLegend"></div>
+        </div>
+      </div>
+
+      <!-- Daily Value Comparison -->
+      <div class="dv-card glass-card animate-in" id="dvCard">
+        <h2 class="section-title">% Daily Value per Serving</h2>
+        <div class="dv-bars" id="dvBars">
+          <!-- dynamic -->
+        </div>
+      </div>
+
+      <!-- Healthier Alternatives -->
+      <div class="alternatives-card glass-card animate-in" id="alternativesCard">
+        <h2 class="section-title">Healthier Alternatives</h2>
+        <div class="alt-grid" id="altGrid">
+          <!-- dynamic cards -->
+        </div>
+      </div>
+
+      <!-- Suitability Warnings -->
+      <div class="warnings-card glass-card animate-in" id="warningsCard">
+        <h2 class="section-title">Who Should Avoid This Product</h2>
+        <div class="warnings-grid" id="warningsGrid">
+          <!-- dynamic -->
+        </div>
+      </div>
+
+      <!-- Future Health Impact -->
+      <div class="impact-card glass-card animate-in" id="impactCard">
+        <h2 class="section-title">If Consumed Daily</h2>
+        <p class="impact-subtitle">Predicted long-term health effects based on this product's nutrition profile</p>
+        <div class="risk-bars" id="riskBars">
+          <!-- dynamic -->
+        </div>
+      </div>
+
+      <!-- Invisible Toxins Radar -->
+      <div class="toxins-card glass-card animate-in" id="toxinsCard">
+        <h2 class="section-title">☢️ Invisible Toxins Radar</h2>
+        <p class="impact-subtitle">Predicted environmental and sourcing risks based on ingredients</p>
+        <div class="toxins-grid" id="toxinsGrid"></div>
+      </div>
+
+      <!-- Neuro-Nutrition -->
+      <div class="neuro-card glass-card animate-in" id="neuroCard">
+        <h2 class="section-title">🧠 Neuro-Nutrition Impact</h2>
+        <p class="impact-subtitle">How this food affects your brain, mood, and sleep</p>
+        <div class="neuro-grid" id="neuroGrid"></div>
+      </div>
+
+      <!-- Ingredient Risk Radar -->
+      <div class="radar-card glass-card animate-in" id="radarCard">
+        <h2 class="section-title">🎯 Ingredient Risk Radar</h2>
+        <p class="impact-subtitle">Every ingredient scanned for purpose, risk, and health impact</p>
+        <div class="radar-grid" id="radarGrid"></div>
+      </div>
+
+      <!-- New Scan Button -->
+      <button class="new-scan-btn" id="newScanBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.07-11.49L1 10"/></svg>
+        New Scan
+      </button>
+    </section>
+
+    <!-- ===== HISTORY PANEL ===== -->
+    <div class="history-panel hidden" id="historyPanel">
+      <div class="history-header">
+        <h2>Scan History</h2>
+        <button class="close-history" id="closeHistory">✕</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <p class="empty-history">No scans yet</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- html5-qrcode CDN -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- 3D Background Scene -->
+  <script src="scene3d.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
